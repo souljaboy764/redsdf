@@ -166,9 +166,9 @@ def main():
     batch_size = np.minimum(batch_size, num_configuration)
 
     if use_left_arm:
-        urdf_file = os.path.join(args.mesh_dir, "tiago_left_arm_simplified.urdf")
+        urdf_file = os.path.join(args.mesh_dir, "tiago_left_arm_simplified_with_screen.urdf")
     else:
-        urdf_file = os.path.join(args.mesh_dir, "tiago_right_arm_simplified.urdf")
+        urdf_file = os.path.join(args.mesh_dir, "tiago_right_arm_simplified_with_screen.urdf")
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
 
