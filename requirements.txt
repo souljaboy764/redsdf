@@ -1,0 +1,13 @@
+numpy
+matplotlib
+pybullet
+torch
+tqdm
+open3d
+scipy
+tensorboard
+pyrender
+trimesh
+smplx
+pinocchio
+pyyaml
