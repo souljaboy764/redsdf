@@ -8,8 +8,16 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_file', type=str, default="checkpoint.pt", help="path of trained model")
     parser.add_argument('--use_cuda', action="store_true", default=False, help="whether to use cuda")
+    parser.add_argument('--random_config', action="store_true", default=False, help="whether to use cuda")
     args = parser.parse_args()
-    joint_pose = np.zeros(8)
+    joint_lower_limits = np.array([0.0, -1.1780972451, -1.1780972451, -0.785398163397,
+                                   -0.392699081699, -2.09439510239, -1.41371669412, -2.09439510239])
+    joint_upper_limits = np.array([0.35, 1.57079632679, 1.57079632679, 3.92699081699,
+                                   2.35619449019, 2.09439510239, 1.41371669412, 2.09439510239])
+    if args.random_config:
+        joint_pose = np.random.uniform(joint_lower_limits, joint_upper_limits)
+    else:
+        joint_pose = np.zeros(8)
     device = 'cuda:0' if args.use_cuda and torch.cuda.is_available() else 'cpu'
     model = torch.load(args.model_file, map_location=device)
     model.eval()
