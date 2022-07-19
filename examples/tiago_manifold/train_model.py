@@ -61,10 +61,9 @@ def main():
                                                  mode_switching_starting_layer=2,
                                                  mode_switching_hidden_sizes=32,
                                                  mode_switching_alpha_last_layer_nonlinear='softplus',
-                                                 mode_switching_alpha_scale_center=[1, 1],
+                                                 mode_switching_alpha_scale_bias=[1, 1],
                                                  mode_switching_rho_last_layer_nonlinear='sigmoid',
-                                                 mode_switching_rho_scale_bias=[1, 0.5],
-                                                 mode_switching_sigma_activation='relu')
+                                                 mode_switching_rho_scale_bias=[1, 0.5])
     opt = torch.optim.Adam(redsdf.nn_model.parameters(), lr=args.lr)
     early_stopping = EarlyStopping(patience=args.patience, verbose=False, path=log_dir + "/checkpoint.pt")
 
