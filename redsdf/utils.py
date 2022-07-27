@@ -112,6 +112,8 @@ def plot2Dcontour(model, pose, file=None, scope=[[-2, 2], [-2, 2]], v=0, axis="z
         result.append(out)
     result = np.concatenate(result, axis=0).reshape(xx.shape)
     fig = plt.figure(figsize=(6, 9))
+    ax = fig.add_subplot(111)
+    ax.set_aspect('equal')
     cs = plt.contour(xx, yy, result, levels=levels)
     plt.clabel(cs, inline=1, fontsize=8)
     plt.xticks([])

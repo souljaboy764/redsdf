@@ -18,13 +18,13 @@ def manifold_controller(env, control_frequency, dist_field='manifold'):
         with open(poi_config_file) as f:
             poi_config = yaml.load(f, Loader=yaml.FullLoader)
 
-        manifold_model_file = os.path.dirname(redsdf.package_dir) + "/object_models/tiago.pt"
+        manifold_model_file = os.path.dirname(redsdf.package_dir) + "/trained_sdf/tiago.pt"
         tiago_manifold_model = torch.load(manifold_model_file)
         if not hasattr(tiago_manifold_model.nn_model, "radius"):
             tiago_manifold_model.nn_model.__setattr__("radius", 0.)
         tiago_dist_field = TiagoDistFieldPoI(env.robot.kinematics, tiago_manifold_model, poi_config, device=device)
         collision_avoid_apf = CollisionAvoidanceAPF(env.robot.kinematics, [tiago_dist_field], max_action=0.8,
-                                                    dist_effect=0.1, device=device)
+                                                    dist_effect=0.12, device=device)
     elif dist_field == 'sphere':
         poi_config_file = os.path.dirname(redsdf.package_dir) + "/reactive_control/yamls/tiago_sphere_config.yaml"
         with open(poi_config_file) as f:

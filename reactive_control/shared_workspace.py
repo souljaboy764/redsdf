@@ -5,6 +5,7 @@ import torch
 import argparse
 import yaml
 from tqdm import tqdm
+import redsdf
 from redsdf.envs.apf import GoToAPF, CollisionAvoidanceAPF, HriController
 from redsdf.envs.dist_field import SmplDistField, TableDistField, HriDistFieldSphere
 from redsdf.envs.human_robot_interaction.human_robot_env import HumanRobotEnv
@@ -12,23 +13,23 @@ from redsdf.envs.human_robot_interaction.human_robot_env import HumanRobotEnv
 
 def manifold_controller(env, control_frequency, dist_field='manifold',
                         max_action_human=1.5, dist_effect_human=0.15,
-                        max_action_table=1.5, dist_effect_table=0.05,):
+                        max_action_table=1.5, dist_effect_table=0.05, ):
     device = 'cuda'
 
     goto_apf = GoToAPF(env.robot.kinematics, frame_ids=[102], max_action=2.0, stiffness=20, damping=0.5, i_gain=5,
                        perturb=False)
     if dist_field == 'manifold':
-        poi_config_file = "../../../yamls/point_config_hri.yaml"
+        poi_config_file = os.path.dirname(redsdf.package_dir) + "/reactive_control/yamls/point_config_hri.yaml"
         with open(poi_config_file) as f:
             poi_config = yaml.load(f, Loader=yaml.FullLoader)
 
-        smpl_model_file = "../../../object_models/human.pt"
+        smpl_model_file = os.path.dirname(redsdf.package_dir) + "/trained_sdf/human.pt"
         smpl_manifold_model = torch.load(smpl_model_file)
         if not hasattr(smpl_manifold_model.nn_model, "radius"):
             smpl_manifold_model.nn_model.__setattr__("radius", 0.)
         smpl_dist_field = SmplDistField(env.robot.kinematics, smpl_manifold_model, poi_config, device=device)
 
-        cube_model_file = "../../../object_models/cube.pt"
+        cube_model_file = os.path.dirname(redsdf.package_dir) + "/trained_sdf/cube.pt"
         smpl_manifold_model = torch.load(cube_model_file)
         cube_dist_field = TableDistField(env.robot.kinematics, smpl_manifold_model, poi_config, device=device)
 
@@ -39,7 +40,7 @@ def manifold_controller(env, control_frequency, dist_field='manifold',
         apf_controller = HriController(env.robot.kinematics, [goto_apf, human_avoid_apf, table_avoid_apf],
                                        step_size=1 / control_frequency)
     elif dist_field == 'sphere':
-        poi_config_file = "tiago_hri_sphere.yaml"
+        poi_config_file = os.path.dirname(redsdf.package_dir) + "/reactive_control/yamls/tiago_hri_sphere.yaml"
         with open(poi_config_file) as f:
             poi_config = yaml.load(f, Loader=yaml.FullLoader)
 
@@ -81,7 +82,7 @@ def experiment(dist_field: str = 'manifold',
                         visualize_smpl=visualize_smpl, visualize_pcl=visualize_pcl)
     exp_time = 30.
 
-    targets = np.load("targets.npy")
+    targets = np.load(os.path.dirname(redsdf.package_dir) + "/object_models/hri_record/targets.npy")
 
     controller = manifold_controller(env, control_frequency, dist_field=dist_field,
                                      max_action_human=max_action_human, dist_effect_human=dist_effect_human,
@@ -149,8 +150,8 @@ def experiment(dist_field: str = 'manifold',
             experiment_logs['targets'].append(target)
             experiment_logs['target_reached_count'].append(target_idx)
             experiment_logs['reach_time'].append(reach_time)
-            experiment_logs['smoothness'].append(smoothness_sum / (i+1))
-            experiment_logs['computation_time'].append(computation_time / (i+1))
+            experiment_logs['smoothness'].append(smoothness_sum / (i + 1))
+            experiment_logs['computation_time'].append(computation_time / (i + 1))
 
         experiment_logs['collisions_human'] = np.array(experiment_logs['collisions_human'])
         experiment_logs['collisions_table'] = np.array(experiment_logs['collisions_table'])
@@ -164,6 +165,7 @@ def experiment(dist_field: str = 'manifold',
     except KeyboardInterrupt:
         env.close()
 
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dist_field', type=str, default="manifold")
@@ -175,6 +177,7 @@ def parse_args():
     parser.add_argument('--results_dir', type=str, default="./logs")
     args = parser.parse_args()
     return vars(args)
+
 
 if __name__ == '__main__':
     args = parse_args()
