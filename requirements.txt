@@ -9,5 +9,5 @@ tensorboard
 pyrender
 trimesh
 smplx
-pinocchio
+pin
 pyyaml

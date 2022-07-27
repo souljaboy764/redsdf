@@ -13,8 +13,8 @@ from redsdf.envs.human_robot_interaction.human_robot_env import HumanRobotEnv
 
 def manifold_controller(env, control_frequency, dist_field='manifold',
                         max_action_human=1.5, dist_effect_human=0.15,
-                        max_action_table=1.5, dist_effect_table=0.05, ):
-    device = 'cuda'
+                        max_action_table=1.5, dist_effect_table=0.05, use_cuda=False):
+    device = 'cuda' if use_cuda and torch.cuda.is_available() else 'cpu'
 
     goto_apf = GoToAPF(env.robot.kinematics, frame_ids=[102], max_action=2.0, stiffness=20, damping=0.5, i_gain=5,
                        perturb=False)
@@ -24,7 +24,7 @@ def manifold_controller(env, control_frequency, dist_field='manifold',
             poi_config = yaml.load(f, Loader=yaml.FullLoader)
 
         smpl_model_file = os.path.dirname(redsdf.package_dir) + "/trained_sdf/human.pt"
-        smpl_manifold_model = torch.load(smpl_model_file)
+        smpl_manifold_model = torch.load(smpl_model_file, map_location=device)
         if not hasattr(smpl_manifold_model.nn_model, "radius"):
             smpl_manifold_model.nn_model.__setattr__("radius", 0.)
         smpl_dist_field = SmplDistField(env.robot.kinematics, smpl_manifold_model, poi_config, device=device)
@@ -61,6 +61,8 @@ def experiment(dist_field: str = 'manifold',
                dist_effect_human: float = 0.15,
                max_action_table: float = 1.5,
                dist_effect_table: float = 0.05,
+               debug_gui: bool = False,
+               use_cuda: bool = False,
                seed: int = 0,
                results_dir: str = './logs'
                ):
@@ -71,7 +73,8 @@ def experiment(dist_field: str = 'manifold',
     n_intermediate_steps = np.ceil(240. / control_frequency).astype(int)
 
     np.random.seed(seed)
-    gui = None
+    gui = 'pyrender' if debug_gui else None
+
     visualize_smpl = False
     visualize_pcl = False
     if gui == 'pyrender':
@@ -86,7 +89,8 @@ def experiment(dist_field: str = 'manifold',
 
     controller = manifold_controller(env, control_frequency, dist_field=dist_field,
                                      max_action_human=max_action_human, dist_effect_human=dist_effect_human,
-                                     max_action_table=max_action_table, dist_effect_table=dist_effect_table)
+                                     max_action_table=max_action_table, dist_effect_table=dist_effect_table,
+                                     use_cuda=use_cuda)
 
     save_dir = os.path.join(results_dir, "exp")
     try:
@@ -173,6 +177,8 @@ def parse_args():
     parser.add_argument('--dist_effect_human', type=float, default=0.15)
     parser.add_argument('--max_action_table', type=float, default=1.5)
     parser.add_argument('--dist_effect_table', type=float, default=0.05)
+    parser.add_argument('--debug_gui', action="store_true", default=False)
+    parser.add_argument('--use_cuda', action="store_true", default=False)
     parser.add_argument('--seed', type=int, default=0)
     parser.add_argument('--results_dir', type=str, default="./logs")
     args = parser.parse_args()

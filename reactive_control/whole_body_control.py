@@ -11,15 +11,15 @@ from redsdf.envs.dist_field import TiagoDistFieldPoI, TiagoDistFieldSphere
 from redsdf.envs.whole_body_control.tiago_env import TiagoEnv
 
 
-def manifold_controller(env, control_frequency, dist_field='manifold'):
-    device = 'cuda'
+def manifold_controller(env, control_frequency, dist_field='manifold', use_cuda=False):
+    device = 'cuda' if use_cuda and torch.cuda.is_available() else 'cpu'
     if dist_field == 'manifold':
         poi_config_file = os.path.dirname(redsdf.package_dir) + "/reactive_control/yamls/query_point_config.yaml"
         with open(poi_config_file) as f:
             poi_config = yaml.load(f, Loader=yaml.FullLoader)
 
         manifold_model_file = os.path.dirname(redsdf.package_dir) + "/trained_sdf/tiago.pt"
-        tiago_manifold_model = torch.load(manifold_model_file)
+        tiago_manifold_model = torch.load(manifold_model_file, map_location=device)
         if not hasattr(tiago_manifold_model.nn_model, "radius"):
             tiago_manifold_model.nn_model.__setattr__("radius", 0.)
         tiago_dist_field = TiagoDistFieldPoI(env.robot.kinematics, tiago_manifold_model, poi_config, device=device)
@@ -42,7 +42,7 @@ def manifold_controller(env, control_frequency, dist_field='manifold'):
     return apf_controller
 
 
-def main(dist_field, results_dir, debug_gui, seed):
+def main(dist_field, results_dir, debug_gui, use_cuda, seed):
     control_frequency = 60.
     n_intermediate_steps = np.ceil(240. / control_frequency).astype(int)
     np.random.seed(0)
@@ -52,7 +52,7 @@ def main(dist_field, results_dir, debug_gui, seed):
     env = TiagoEnv(n_intermediate_steps=n_intermediate_steps, gui=gui, control_mode='position')
     exp_time = 30.
     targets = [env.sample_target() for _ in range(1000)]
-    controller = manifold_controller(env, control_frequency, dist_field=dist_field)
+    controller = manifold_controller(env, control_frequency, dist_field=dist_field, use_cuda=use_cuda)
 
     save_dir = results_dir
     try:
@@ -130,6 +130,7 @@ def parse_args():
     parser.add_argument('--dist_field', type=str, default="manifold")
     parser.add_argument('--results_dir', type=str, default="./logs")
     parser.add_argument('--debug_gui', action="store_true", default=False)
+    parser.add_argument('--use_cuda', action="store_true", default=False)
     parser.add_argument('--seed', type=int, default=0)
     args = parser.parse_args()
     return vars(args)
