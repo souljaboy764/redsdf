@@ -30,7 +30,7 @@ def manifold_controller(env, control_frequency, dist_field='manifold',
         smpl_dist_field = SmplDistField(env.robot.kinematics, smpl_manifold_model, poi_config, device=device)
 
         cube_model_file = os.path.dirname(redsdf.package_dir) + "/trained_sdf/cube.pt"
-        smpl_manifold_model = torch.load(cube_model_file)
+        smpl_manifold_model = torch.load(cube_model_file, map_location=device)
         cube_dist_field = TableDistField(env.robot.kinematics, smpl_manifold_model, poi_config, device=device)
 
         human_avoid_apf = CollisionAvoidanceAPF(env.robot.kinematics, [smpl_dist_field], max_action=max_action_human,
