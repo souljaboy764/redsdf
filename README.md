@@ -1,10 +1,12 @@
 # Regularized Deep Signed Distance Fields for Reactive Motion Generation
 Puze Liu, Kuo Zhang, Davide Tateo, Snehal Jauhri, Jan Peters and Georgia Chalvatzaki
-<p align="center">
-<img src=fig/hri.gif width="400">
-</p>
 
 [website](https://irosalab.com/2022/02/28/redsdf/), [paper](https://www.ias.informatik.tu-darmstadt.de/uploads/Team/PuzeLiu/IROS_2022_ReDSDF.pdf)
+
+<p align="center">
+<img src=fig/tiago.png height="380">
+<img src=fig/hri.gif height="380">
+</p>
 
 ## Installation
 ```python
@@ -65,4 +67,15 @@ python reactive_control/whole_body_control.py --debug_gui --use_cuda
 Alternatively, run the experiment of human robot interaction:
 ```python
 python reactive_control/shared_workspace.py --debug_gui --use_cuda
+```
+
+## Citation
+```latex
+@inproceedings{IROS_2022_ReDSDF,
+  author =		 "Liu, P. and  Zhang, K. and Tateo D. and  Jauhri S. and  Peters J. and  Chalvatzaki G. and ",
+  year =		 "2022",
+  title =		 "Regularized Deep Signed Distance Fields for Reactive Motion Generation",
+  booktitle =		 "2022 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)",
+  URL =			 "https://www.ias.informatik.tu-darmstadt.de/uploads/Team/PuzeLiu/IROS_2022_ReDSDF.pdf",
+}
 ```
