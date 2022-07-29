@@ -8,7 +8,7 @@ import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--mesh_file', type=str, default="../../object_models/sofa.obj", help="path of mesh file")
-parser.add_argument('--data_dir', type=str, default="./data_sofa", help="path to save generated data")
+parser.add_argument('--save_dir', type=str, default="./data_sofa", help="path to save generated data")
 args = parser.parse_args()
 
 

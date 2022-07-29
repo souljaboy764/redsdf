@@ -10,9 +10,9 @@ import redsdf
 from redsdf.redsdf_dataset_generator import generate_dataset
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--mesh_dir', type=str, default=os.path.dirname(redsdf.package_dir) + "/object_models/tiago_urdf",
+parser.add_argument('--urdf_dir', type=str, default=os.path.dirname(redsdf.package_dir) + "/object_models/tiago_urdf",
                     help="Path of mesh file")
-parser.add_argument('--data_dir', type=str, default="./data", help="Path to save generated data")
+parser.add_argument('--save_dir', type=str, default="./data", help="Path to save generated data")
 parser.add_argument('--n_poses', type=int, default=10000, help="Number of poses")
 parser.add_argument('--right_arm', action="store_true", default=False, help="Whether to train right arm or left")
 parser.add_argument('--debug', action="store_true", default=False, help="Debug the generation process")
