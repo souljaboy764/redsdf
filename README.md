@@ -10,6 +10,8 @@ Puze Liu, Kuo Zhang, Davide Tateo, Snehal Jauhri, Jan Peters and Georgia Chalvat
 
 ## Installation
 ```python
+git lfs clone https://git.ias.informatik.tu-darmstadt.de/ias_code/iros2022/redsdf.git
+cd redsdf
 pip install -e .
 ```
 
