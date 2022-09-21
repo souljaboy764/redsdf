@@ -262,3 +262,28 @@ def ray_marching(model, pose, eye, pic_matrix, w, h, ms, device, e, f, v):
         if not np.any(depth_idx):
             break
     return np.concatenate(all_data, axis=0)
+
+def create_vis_animation(pcl):
+    pcl = pcl[np.random.choice(np.arange(pcl.shape[0]), np.maximum(15000, pcl.shape[0]))]
+    from scipy.spatial.transform import Rotation
+    vis = o3d.visualization.Visualizer()
+    vis.create_window()
+    view_control = vis.get_view_control()
+
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(pcl)
+    vis.add_geometry(pcd)
+    vis.update_geometry(pcd)
+
+    # origin = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2, origin=[0., 0., 0.])
+    # vis.add_geometry(origin)
+    # vis.update_geometry(origin)
+    T = np.eye(4)
+
+    for i in range(5000):
+        T[:3, :3] = Rotation.from_euler('z', 0.02).as_matrix()
+        pcd.transform(T)
+        vis.update_geometry(pcd)
+        vis.update_renderer()
+        vis.poll_events()
+        time.sleep(0.01)
