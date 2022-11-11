@@ -18,6 +18,7 @@ def main():
         joint_pose = np.random.uniform(joint_lower_limits, joint_upper_limits)
     else:
         joint_pose = np.zeros(8)
+    joint_pose = np.array([0.1, 0.7, -0.5, 1.0, 1.5, 0., -1.1, 0.])
     device = 'cuda:0' if args.use_cuda and torch.cuda.is_available() else 'cpu'
     model = torch.load(args.model_file, map_location=device)
     model.eval()
@@ -27,6 +28,7 @@ def main():
                                                       ypr_list=[[0, 0, 0], [90, 0, 0], [180, 0, 0], [270, 0, 0],
                                                                 [0, -90, 0], [0, 90, 0], [45, -45, 0], [135, -45, 0],
                                                                 [-45, -45, 0], [-135, -45, 0]])
+    create_vis_animation(points_model)
     visualization_pointcloud(points_model)
     plot2Dcontour(model, joint_pose, scope=[[-1., 1.], [-0.2, 1.5]], device='cuda', axis='x', step_length=0.01)
 

@@ -159,16 +159,16 @@ def main():
     use_left_arm = not args.right_arm
     debug_collision = False
     append_data = args.append_data
-    output_dir = args.data_dir
+    output_dir = args.save_dir
     num_configuration = args.n_poses
     batch_size = 1000
 
     batch_size = np.minimum(batch_size, num_configuration)
 
     if use_left_arm:
-        urdf_file = os.path.join(args.mesh_dir, "tiago_left_arm_simplified_with_screen.urdf")
+        urdf_file = os.path.join(args.urdf_dir, "tiago_left_arm_simplified_with_screen.urdf")
     else:
-        urdf_file = os.path.join(args.mesh_dir, "tiago_right_arm_simplified_with_screen.urdf")
+        urdf_file = os.path.join(args.urdf_dir, "tiago_right_arm_simplified_with_screen.urdf")
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
 

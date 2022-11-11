@@ -263,7 +263,7 @@ def ray_marching(model, pose, eye, pic_matrix, w, h, ms, device, e, f, v):
             break
     return np.concatenate(all_data, axis=0)
 
-def create_vis_animation(pcl):
+def create_vis_animation(pcl, rot_axis='z'):
     pcl = pcl[np.random.choice(np.arange(pcl.shape[0]), np.maximum(15000, pcl.shape[0]))]
     from scipy.spatial.transform import Rotation
     vis = o3d.visualization.Visualizer()
@@ -272,6 +272,11 @@ def create_vis_animation(pcl):
 
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(pcl)
+    T = np.eye(4)
+
+    T[:3, :3] = Rotation.from_euler('x', np.pi/2).as_matrix()
+    pcd.transform(T)
+
     vis.add_geometry(pcd)
     vis.update_geometry(pcd)
 
@@ -281,7 +286,7 @@ def create_vis_animation(pcl):
     T = np.eye(4)
 
     for i in range(5000):
-        T[:3, :3] = Rotation.from_euler('z', 0.02).as_matrix()
+        T[:3, :3] = Rotation.from_euler(rot_axis, 0.02).as_matrix()
         pcd.transform(T)
         vis.update_geometry(pcd)
         vis.update_renderer()

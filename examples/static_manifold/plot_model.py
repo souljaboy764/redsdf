@@ -18,6 +18,7 @@ pcl, _ = utils.generate_pointcloud_by_raymarching(dis_model, pose_c, device=devi
                                                             [-45, -45, 0], [-135, -45, 0], [45, 45, 0], [135, 45, 0],
                                                             [-45, 45, 0], [-135, 45, 0]],
                                                   epsilon=0.0005)
-utils.visualization_pointcloud(pcl)
+utils.create_vis_animation(pcl)
+# utils.visualization_pointcloud(pcl)
 utils.plot2Dcontour(dis_model, pose_c, axis="z", v=0, device=device)
 utils.plot2Dcontour(dis_model, pose_c, axis="y", v=-0.25, device=device)
