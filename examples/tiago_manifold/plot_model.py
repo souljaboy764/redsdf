@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import argparse
-from redsdf.utils import visualization_pointcloud, generate_pointcloud_by_raymarching, plot2Dcontour
+from redsdf.utils import *
 
 
 def main():

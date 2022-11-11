@@ -280,11 +280,6 @@ def create_vis_animation(pcl, rot_axis='z'):
     vis.add_geometry(pcd)
     vis.update_geometry(pcd)
 
-    # origin = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.2, origin=[0., 0., 0.])
-    # vis.add_geometry(origin)
-    # vis.update_geometry(origin)
-    T = np.eye(4)
-
     for i in range(5000):
         T[:3, :3] = Rotation.from_euler(rot_axis, 0.02).as_matrix()
         pcd.transform(T)
