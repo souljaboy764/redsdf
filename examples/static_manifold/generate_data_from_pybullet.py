@@ -96,7 +96,7 @@ def generate_point_cloud(N_points=10000):
     return np.asarray(cl.points), np.asarray(cl.normals)
 
 def main():
-    data_dir = args.data_dir
+    data_dir = args.save_dir
     if not os.path.exists(data_dir):
        os.makedirs(data_dir)
     points, normals = generate_point_cloud(N_points=10000)

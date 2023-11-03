@@ -10,7 +10,7 @@ parser.add_argument('--save_dir', type=str, default="./data_human", help="path t
 args = parser.parse_args()
 
 mesh = o3d.io.read_triangle_mesh(args.mesh_file)
-data_dir = args.data_dir
+data_dir = args.save_dir
 if not os.path.exists(data_dir):
     os.makedirs(data_dir)
 mesh.compute_vertex_normals()
