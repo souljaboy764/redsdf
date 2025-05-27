@@ -23,8 +23,6 @@ def generate_single_view_point_cloud(depth_img, projection_matrix, view_matrix):
     return np.concatenate([point_world[:, :3], -point_dir], axis=1)
 
 def generate_point_cloud(mesh_file, meshScale=[1, 1, 1], basePosition=[0, 0, 0], baseOrientation=[0, 0, 0, 1.], N_points=10000):
-    physicsClient = p.connect(p.GUI)
-    p.setAdditionalSearchPath(pybullet_data.getDataPath())
     assert mesh_file.endswith(".obj") or mesh_file.endswith(".urdf")
     if mesh_file.endswith(".obj"):
         visualShapeId = p.createVisualShape(
@@ -38,7 +36,7 @@ def generate_point_cloud(mesh_file, meshScale=[1, 1, 1], basePosition=[0, 0, 0],
            fileName=mesh_file,
            meshScale=meshScale
         )
-        object= p.createMultiBody(
+        object_id = p.createMultiBody(
            baseMass=1.0,
            baseCollisionShapeIndex=collisionShapeId,
            baseVisualShapeIndex=visualShapeId,
@@ -46,7 +44,7 @@ def generate_point_cloud(mesh_file, meshScale=[1, 1, 1], basePosition=[0, 0, 0],
            baseOrientation=baseOrientation
         )
     elif mesh_file.endswith(".urdf"):
-        object = p.loadURDF(mesh_file)
+        object_id = p.loadURDF(mesh_file)
 
     camara_parameters = {'img_width': 256,
                          'img_height': 256,
@@ -55,7 +53,7 @@ def generate_point_cloud(mesh_file, meshScale=[1, 1, 1], basePosition=[0, 0, 0],
                          'farVal': 6.0,
                          'nearVal': 0.1,
                          'up_axis': 2,
-                          'distance': 1.2,
+                          'distance': 2,
                           'target_position': [0.0, 0.0, 0.0]
                           }
     ypr_list = np.array([[0, 0, 0], [90, 0, 0], [180, 0, 0], [-90, 0, 0], [0, 90, 0], [0, -90, 0],
@@ -85,14 +83,15 @@ def generate_point_cloud(mesh_file, meshScale=[1, 1, 1], basePosition=[0, 0, 0],
     if len(pcd.points) > N_points:
         pcd = pcd.uniform_down_sample(int(np.floor(len(pcd.points) / N_points)))
     cl, ind = pcd.remove_statistical_outlier(nb_neighbors=15, std_ratio=5)
-    o3d.visualization.draw_geometries([cl], point_show_normal=False)
-    p.disconnect()
+    p.removeBody(object_id)
     return np.asarray(cl.points), np.asarray(cl.normals)
 
 def main(args):
     data_dir = args.save_dir
     if not os.path.exists(data_dir):
        os.makedirs(data_dir)
+    physicsClient = p.connect(p.GUI)
+    p.setAdditionalSearchPath(pybullet_data.getDataPath())
     points, normals = generate_point_cloud(mesh_file = args.mesh_file, N_points=10000)
 
     parameters = {'clean_aug_data': True,
@@ -122,6 +121,7 @@ def main(args):
     pcd.points = o3d.utility.Vector3dVector(points)
     pcd.normals = o3d.utility.Vector3dVector(normals)
     o3d.io.write_point_cloud(os.path.join(data_dir, "pointcloud.ply"), pcd)
+    p.disconnect()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
