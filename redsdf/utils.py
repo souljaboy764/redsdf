@@ -263,8 +263,10 @@ def ray_marching(model, pose, eye, pic_matrix, w, h, ms, device, e, f, v):
             break
     return np.concatenate(all_data, axis=0)
 
-def create_vis_animation(pcl, rot_axis='z'):
-    pcl = pcl[np.random.choice(np.arange(pcl.shape[0]), np.maximum(15000, pcl.shape[0]))]
+def create_vis_animation(pcl, mesh=None, rot_axis='z'):
+    # mesh=None
+    print("The point cloud has {} points".format(pcl.shape[0]))
+    # pcl = pcl[np.random.choice(np.arange(pcl.shape[0]), np.maximum(15000, pcl.shape[0]))]
     from scipy.spatial.transform import Rotation
     vis = o3d.visualization.Visualizer()
     vis.create_window()
@@ -274,16 +276,27 @@ def create_vis_animation(pcl, rot_axis='z'):
     pcd.points = o3d.utility.Vector3dVector(pcl)
     T = np.eye(4)
 
-    T[:3, :3] = Rotation.from_euler('x', np.pi/2).as_matrix()
-    pcd.transform(T)
+    # T[:3, :3] = Rotation.from_euler('x', np.pi/2).as_matrix()
+    # pcd.transform(T)
 
     vis.add_geometry(pcd)
     vis.update_geometry(pcd)
+    
+    if mesh is not None:
+        mesh.paint_uniform_color([0.8, 0.1, 0.5])
+        mesh = mesh.sample_points_uniformly(number_of_points=15000)
+        vis.add_geometry(mesh)
+        vis.update_geometry(mesh)
 
     for i in range(5000):
-        T[:3, :3] = Rotation.from_euler(rot_axis, 0.02).as_matrix()
-        pcd.transform(T)
-        vis.update_geometry(pcd)
+        # T[:3, :3] = Rotation.from_euler(rot_axis, 0.02).as_matrix()
+        # pcd.transform(T)
+        # vis.update_geometry(pcd)
+        # if mesh is not None:
+        #     mesh.transform(T)
+        #     vis.update_geometry(mesh)
         vis.update_renderer()
-        vis.poll_events()
+        if not vis.poll_events():
+            break
         time.sleep(0.01)
+        
