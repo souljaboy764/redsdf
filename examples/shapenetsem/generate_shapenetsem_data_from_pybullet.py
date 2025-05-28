@@ -4,11 +4,13 @@ import os
 import argparse
 import csv
 from scipy.spatial.transform import Rotation as R
+import torch
 
 import pybullet as p
 import pybullet_data
 
 from redsdf.redsdf_dataset_generator import generate_dataset
+from redsdf.models.pointnet2.pointnet2_cls_msg import PointNet2_CLS_MSG
 from examples.static_manifold.generate_data_from_pybullet import generate_point_cloud
 
 parser = argparse.ArgumentParser()
@@ -75,6 +77,12 @@ if args.visualize:
 else:
     physicsClient = p.connect(p.DIRECT)
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
+
+model = PointNet2_CLS_MSG(40)
+model.load_state_dict(torch.load(os.path.join(os.path.dirname(__file__), "../../redsdf/models/pointnet2/best_model.pth"))['model_state_dict'])
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+model.to(device)
+model.eval()
 
 for category in args.categories:  # args.category can be a single category or a list of categories
     keys = category_dict[category]
@@ -173,6 +181,10 @@ for category in args.categories:  # args.category can be a single category or a 
         np.save(os.path.join(object_dir, "0.npy"),
                 dataset.astype(np.single))
         np.save(os.path.join(object_dir, 'poses.npy'), joint_pos.astype(np.single))
+        
+        with torch.no_grad():
+            pcd_embedding = model(torch.concat([torch.Tensor(points), torch.Tensor(normals)], dim=1).T.to(device)[None, ...])[0].detach().cpu().numpy()
+        np.save(os.path.join(object_dir, "pointnet2_embedding.npy"), pcd_embedding)
         
         o3d.io.write_triangle_mesh(os.path.join(object_dir, "scaled_mesh.obj"), mesh)
         o3d.io.write_point_cloud(os.path.join(object_dir, "pointcloud.ply"), pcd)
