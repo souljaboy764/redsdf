@@ -40,9 +40,9 @@ class ManifoldDataset(Dataset):
 def get_file_list(data_dir):
     file_list = list()
     for data_file in os.listdir(data_dir):
-        if data_file.endswith(".npy") and not data_file.startswith("poses"):
-            file_list.append(data_file)
-    random.shuffle(file_list)
+        if data_file.endswith(".npy") and not data_file.startswith("poses") and not data_file.startswith("pointnet2_embedding"):
+            file_list.append(os.path.join(data_dir, data_file))
+    # random.shuffle(file_list)
     return file_list
 
 
@@ -71,4 +71,35 @@ def construct_loader(data_dir, train_dataset_ratio=0.8, validate_dataset_ratio=0
     test_data_loader = DataLoader(test_dataset, **kwargs)
     return train_data_loader, validate_data_loader, test_data_loader, poses
 
+def construct_loader_category(data_dir, train_dataset_ratio=0.8, validate_dataset_ratio=0.1, **kwargs):
+    """_summary_
 
+    Args:
+        data_dir (str): path to the data directory of a category containing subdirectories with teh corresponding shapenet hexcode that has the data generated for redsdf.
+        train_dataset_ratio (float, optional): _description_. Defaults to 0.8.
+        validate_dataset_ratio (float, optional): _description_. Defaults to 0.1.
+
+    Returns:
+        _type_: _description_
+    """
+
+    pointnet2_embeddings = []
+    data = []
+    for i, subdir in enumerate(os.listdir(data_dir)):
+        print(f"Loading data from subdirectory {subdir} ({i+1}/{len(os.listdir(data_dir))})")
+        subdir_path = os.path.join(data_dir, subdir)
+        data_file = os.path.join(subdir_path, "0.npy")
+        data_i = np.load(data_file)
+        data_i[:, -1] = i
+        data.append(data_i)
+        pointnet2_embeddings.append(np.load(os.path.join(subdir_path, "pointnet2_embedding.npy")).astype(np.float32)[0])
+        
+    data = torch.tensor(np.concatenate(data)).type(torch.float)
+    pointnet2_embeddings = torch.tensor(np.array(pointnet2_embeddings)).type(torch.float)
+    train_idx = int(data.shape[0] * train_dataset_ratio)
+    validate_idx = int(data.shape[0] * (train_dataset_ratio+validate_dataset_ratio))
+    print(f"Data shape: {data.shape}, Training samples: {train_idx}, Validation samples: {validate_idx-train_idx}, Test samples: {data.shape[0]-validate_idx}")
+    train_data_loader = DataLoader(data[:train_idx], **kwargs)
+    validate_data_loader = DataLoader(data[train_idx:validate_idx], **kwargs)
+    test_data_loader = DataLoader(data[validate_idx:], **kwargs)
+    return train_data_loader, validate_data_loader, test_data_loader, pointnet2_embeddings

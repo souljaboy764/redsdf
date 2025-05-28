@@ -284,7 +284,7 @@ def create_vis_animation(pcl, mesh=None, rot_axis='z'):
     
     if mesh is not None:
         mesh.paint_uniform_color([0.8, 0.1, 0.5])
-        mesh = mesh.sample_points_uniformly(number_of_points=15000)
+        # mesh = mesh.sample_points_uniformly(number_of_points=15000)
         vis.add_geometry(mesh)
         vis.update_geometry(mesh)
 
