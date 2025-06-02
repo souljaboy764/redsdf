@@ -41,7 +41,8 @@ def get_file_list(data_dir):
     file_list = list()
     for data_file in os.listdir(data_dir):
         if data_file.endswith(".npy") and not data_file.startswith("poses") and not data_file.startswith("pointnet2_embedding"):
-            file_list.append(os.path.join(data_dir, data_file))
+            # file_list.append(os.path.join(data_dir, data_file))
+            file_list.append(data_file)
     # random.shuffle(file_list)
     return file_list
 
@@ -93,6 +94,9 @@ def construct_loader_category(data_dir, train_dataset_ratio=0.8, validate_datase
         data_i[:, -1] = i
         data.append(data_i)
         pointnet2_embeddings.append(np.load(os.path.join(subdir_path, "pointnet2_embedding.npy")).astype(np.float32)[0])
+        if i>=10:
+            print(f"Loaded {i+1} samples, stopping early for testing purposes.")
+            break
         
     data = torch.tensor(np.concatenate(data)).type(torch.float)
     pointnet2_embeddings = torch.tensor(np.array(pointnet2_embeddings)).type(torch.float)
